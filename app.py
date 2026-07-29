@@ -31,7 +31,7 @@ def process_bay_with_gemini(file_bytes, password):
     except:
         pass
 
-    model_name = "gemini-1.5-flash" 
+    model_name = "gemini-2.5-flash" 
     prompt = """
     คุณคือ OCR ผู้เชี่ยวชาญด้านบัญชี โปรดอ่านสเตทเมนท์ธนาคารกรุงศรี (BAY) จากไฟล์นี้
     และคืนค่าเป็น JSON Array ของ Array เท่านั้น [["วันที่", "เวลา", "จำนวนเงิน", "ยอดคงเหลือ", "รหัส", "รายละเอียด", "ช่องทาง", "รหัสสาขา"]]
