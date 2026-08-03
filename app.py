@@ -354,7 +354,7 @@ def parse_scb_pdf(pdf_stream):
                         
                         # แยกเงินเข้า (+) หรือเงินออก (-) ตาม Code
                         # รหัสเงินเข้าพบบ่อย: X1, IN, IT, BT, DP, CR, SD, C1
-                        credit_codes = ['X1', 'IN', 'IT', 'BT', 'DP', 'CR', 'SD', 'C1', 'NR', 'TRN']
+                        credit_codes = ['X1', 'IN', 'IT', 'BT', 'DP', 'CR', 'SD', 'C1', 'NR', 'TRN', 'XB']
                         if code.upper() in credit_codes:
                             amount_val = raw_amount
                         else:
