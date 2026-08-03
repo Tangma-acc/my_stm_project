@@ -286,7 +286,16 @@ def parse_scb_pdf(pdf_stream):
         "computer-generated", "authorized person", "signature of SCB",
         "หน้าที่", "Page", "เอกสารฉบับนี้", "จัดพิมพ์ผ่านระบบคอมพิวเตอร์",
         "Balance Carried Forward", "ยอดเงินคงเหลือยกไป", "ธนาคารไทยพาณิชย์", "จำกัด", "(มหาชน)", "จำนวนเงินนำเข้าบัญชีทั้งหมด", 
-        "Total Credit Amount", "จำนวนเงินที่หักบัญชีทั้งหมด", "Total Debit Amount"
+        "Total Credit Amount", "จำนวนเงินที่หักบัญชีทั้งหมด", "Total Debit Amount",         
+        "Date", "Time", "Code", "Channel", "Cheque No.", "Withdrawal", "Deposit", "Description",
+        "Debit/Credit", "Balance/Baht", "วันที่", "เวลา", "รายการ", "ช่องทาง", "ยอดเงินคงเหลือ",
+        "อัปเดตล่าสุดเมื่อ", "Last Updated", "รายการเดินบัญชี", "Historical Statement",
+        "ชื่อบัญชี", "Account Name", "เลขที่บัญชี", "Account No.", "ชื่อสาขา", "Branch Name",
+        "สถานะ", "Status", "ประเภทบัญชี", "Account Type", "สกุลเงิน", "Currency",
+        "วันที่: เริ่ม", "Date เริ่ม", "สิ้นสุด", "End", "หน้าที่", "Page",
+        "บริษัท คลังสมบัติ", # ตัวอย่างชื่อบริษัท (ถ้าต้องการเจาะจง)
+        "TOTAL ITEMS", "TOTAL AMOUNT", "TOTAL DEBIT", "TOTAL CREDIT",
+        "ธนาคารไทยพาณิชย์", "จัดพิมพ์ผ่านระบบคอมพิวเตอร์"
     ]
 
     with pdfplumber.open(pdf_stream) as pdf:
