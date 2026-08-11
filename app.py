@@ -176,7 +176,7 @@ def parse_kbank_pdf(pdf_stream):
                         balance = str_to_float(amounts[0])
                     elif len(amounts) >= 2:
                         # แยกยอดเงินเข้า/ออก
-                        is_deposit = any(kw in desc for kw in ["รับเงิน", "คืนเงิน", "ฝาก", "เงินคืน", "Thai QR", "รับโอนเงิน", "รับโอน", "รับเงินจาก"])
+                        is_deposit = any(kw in desc for kw in ["รับเงิน", "คืนเงิน", "ฝาก", "เงินคืน", "Thai QR", "รับโอนเงิน", "รับโอน", "รับเงินจาก", "คืนค่าสินค้าและบริการ"])
                         val = str_to_float(amounts[0])
                         amount_val = val if is_deposit else -val
                         # ยอดคงเหลือคือตัวเลขชุดสุดท้ายในบรรทัด (อาจติดลบ)
