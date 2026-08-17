@@ -288,7 +288,7 @@ def parse_scb_pdf(pdf_stream):
         "Balance Carried Forward", "ยอดเงินคงเหลือยกไป", "ธนาคารไทยพาณิชย์", "จำนวนเงินนำเข้าบัญชีทั้งหมด", 
         "Total Credit Amount", "จำนวนเงินที่หักบัญชีทั้งหมด", "Total Debit Amount",         
         "Date", "Time", "Code", "Channel", "Cheque No.", "Withdrawal", "Deposit", "Description",
-        "Debit/Credit", "Balance/Baht", "วันที่", "เวลา", "รายการ", "ช่องทาง", "ยอดเงินคงเหลือ",
+        "Debit/Credit", "Balance/Baht", "วันที่", "เวลา", "ช่องทาง", "ยอดเงินคงเหลือ",
         "อัปเดตล่าสุดเมื่อ", "Last Updated", "รายการเดินบัญชี", "Historical Statement",
         "ชื่อบัญชี", "Account Name", "เลขที่บัญชี", "Account No.", "ชื่อสาขา", "Branch Name",
         "สถานะ", "Status", "ประเภทบัญชี", "Account Type", "สกุลเงิน", "Currency",
