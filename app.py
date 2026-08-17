@@ -308,30 +308,24 @@ def parse_scb_pdf(pdf_stream):
                 line_clean = line.strip()
                 if not line_clean: continue
 
-                # --- 1. เช็คยอดยกมา (BF) เป็นอันดับแรก ---
+                # --- 1. เช็คยอดยกมา (BF) ---
                 if any(kw.upper() in line_clean.upper() for kw in bf_keywords):
                     amounts = re.findall(r'(\d{1,3}(?:,\d{3})*\.\d{2})', line_clean)
                     if amounts:
-                        # ยอดยกมามักจะเป็นยอดเงินสุดท้ายของบรรทัดนี้
                         balance = str_to_float(amounts[-1])
                         all_parsed_rows.append([None, None, "B/F", "-", 0.0, balance, "ยอดยกมา (BALANCE BROUGHT FORWARD)"])
-                    header_found = True # เมื่อเจอยอดยกมาแล้ว ถือว่าเริ่มตารางแล้ว
+                    header_found = True
                     continue
 
-                # --- 2. เช็คหัวตาราง เพื่อเริ่มอ่านข้อมูลในหน้าใหม่ๆ ---
+                # --- 2. เช็คหัวตาราง (ตรวจจับเพื่อเริ่มอ่านข้อมูล) ---
                 if ("Date" in line_clean and "Time" in line_clean) or ("วันที่" in line_clean and "เวลา" in line_clean):
                     header_found = True
                     continue 
 
-                if not header_found:
-                    continue
+                if not header_found: continue
 
-                # --- 3. ข้ามบรรทัดที่ไม่ใช่ข้อมูล (Header ซ้ำ/Footer) ---
-                if any(kw in line_clean for kw in ignore_keywords):
-                    continue
-
-                # --- 4. อ่านรายการ Transaction ---
-                # Regex ตรวจวันที่ (DD/MM/YY หรือ DD/MM/YYYY) และ เวลา (HH:MM)
+                # --- 3. อ่านรายการ Transaction (ย้ายขึ้นมาไว้ก่อน Ignore) ---
+                # ใช้ regex ตรวจสอบรูปแบบ วันที่ + เวลา (เช่น 22/03/26 12:30)
                 transaction_match = re.match(r'^(\d{2}/\d{2}/\d{2,4})\s+(\d{2}:\d{2})', line_clean)
                 
                 if transaction_match:
@@ -340,11 +334,11 @@ def parse_scb_pdf(pdf_stream):
                     
                     amounts = re.findall(r'(\d{1,3}(?:,\d{3})*\.\d{2})', line_clean)
                     
-                    temp_text = line_clean.replace(date_str, "").replace(time_str, "").strip()
+                    # แยกส่วนอื่นๆ ออกเพื่อดึง Code และ Channel
+                    temp_text = line_clean.replace(date_str, "", 1).replace(time_str, "", 1).strip()
                     parts = temp_text.split()
                     
                     code = parts[0] if len(parts) > 0 else "-"
-                    # ตรวจสอบว่าช่อง Channel มีข้อมูลไหม (ถ้าตัวถัดไปไม่ใช่ตัวเลขยอดเงิน)
                     channel = parts[1] if len(parts) > 1 and not re.match(r'[\d,]+\.\d{2}', parts[1]) else "-"
                     
                     amount_val, balance_val = 0.0, 0.0
@@ -352,19 +346,16 @@ def parse_scb_pdf(pdf_stream):
                         balance_val = str_to_float(amounts[-1])
                         raw_amount = str_to_float(amounts[-2])
                         
-                        # แยกเงินเข้า (+) หรือเงินออก (-) ตาม Code
-                        # รหัสเงินเข้าพบบ่อย: X1, IN, IT, BT, DP, CR, SD, C1
                         credit_codes = ['X1', 'IN', 'IT', 'BT', 'DP', 'CR', 'SD', 'C1', 'NR', 'TRN', 'XB']
                         if code.upper() in credit_codes:
                             amount_val = raw_amount
                         else:
-                            # รหัสเงินออกพบบ่อย: FE, WD, ATM, TR, DC, X2 (บางกรณี)
                             amount_val = -raw_amount
                     elif len(amounts) == 1:
                         balance_val = str_to_float(amounts[0])
 
-                    # ตัดส่วนวันที่ เวลา รหัส และยอดเงินออก เพื่อให้เหลือแต่ Description
-                    desc_raw = line_clean.replace(date_str, "").replace(time_str, "").replace(code, "", 1)
+                    # ดึงรายละเอียด (Description) โดยการลบส่วนประกอบอื่นๆ ออกจากบรรทัด
+                    desc_raw = line_clean.replace(date_str, "", 1).replace(time_str, "", 1).replace(code, "", 1)
                     if channel != "-": desc_raw = desc_raw.replace(channel, "", 1)
                     for amt in amounts: desc_raw = desc_raw.replace(amt, "")
                     
@@ -372,15 +363,19 @@ def parse_scb_pdf(pdf_stream):
                     pending_desc = "" 
                     
                     all_parsed_rows.append([date_str, time_str, code, channel, amount_val, balance_val, final_desc])
-                
-                # --- 5. เก็บรายละเอียดที่อยู่คนละบรรทัด ---
+                    continue # <--- สำคัญมาก: เมื่อบันทึก Transaction แล้วให้ข้ามไปบรรทัดถัดไปเลย ไม่ต้องไปเช็ค ignore ด้านล่าง
+
+                # --- 4. ข้ามบรรทัดที่ไม่ใช่ข้อมูล (ทำหลังจากเช็ค Transaction แล้ว) ---
+                # แนะนำ: ให้ลบ "รายการ", "วันที่", "เวลา", "ช่องทาง" ออกจาก ignore_keywords หรือเช็คให้เจาะจงขึ้น
+                if any(kw in line_clean for kw in ignore_keywords):
+                    continue
+
+                # --- 5. เก็บรายละเอียดที่อยู่บรรทัดถัดไป (เหมือนเดิม) ---
                 elif all_parsed_rows:
-                    # ถ้าเจอคำหลักที่เป็นจุดเริ่มรายละเอียด
                     keywords_desc = ("รับโอนจาก", "โอนไป", "รับเงินโอน", "ชำระเงิน", "จากระบบ", "ค่าธรรมเนียม", "PromptPay", "TO ", "FROM ")
                     if line_clean.startswith(keywords_desc):
                         pending_desc = (pending_desc + " " + line_clean).strip()
                     else:
-                        # กรณีเป็นข้อความรายละเอียดทั่วไป ให้ต่อท้ายรายการล่าสุด
                         all_parsed_rows[-1][6] = (all_parsed_rows[-1][6] + " " + line_clean).strip()
 
      # --- ส่วนของการกรองข้อมูล (คงโครงสร้างเดิมตามที่คุณต้องการ) ---
